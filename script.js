@@ -101,15 +101,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* --- Contact form (front-end only demo) --- */
+
+  /* --- Contact form (submits to Formspree) --- */
   const form = document.querySelector('#contact-form');
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const status = form.querySelector('.form-status');
-    if(status){
-      status.textContent = 'Thank you — your message has been received. HIP will be in touch shortly.';
+    const submitBtn = form.querySelector('.submit-btn');
+    if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+    try{
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+      if(response.ok){
+        if(status){ status.style.color = ''; status.textContent = 'Thank you — your message has been received. HIP will be in touch shortly.'; }
+        form.reset();
+      } else {
+        if(status){ status.style.color = '#b23b3b'; status.textContent = 'Something went wrong — please email us directly at Hipmenswears@proton.me.'; }
+      }
+    } catch(err){
+      if(status){ status.style.color = '#b23b3b'; status.textContent = 'Something went wrong — please email us directly at Hipmenswears@proton.me.'; }
+    } finally {
+      if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Send Message →'; }
     }
-    form.reset();
   });
 
 });
